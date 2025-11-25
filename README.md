@@ -3,7 +3,7 @@
 
 Este projeto é uma página simples chamada **Sistema Mecânica**, construída em HTML/JS, que permite gerenciar senhas de sites diretamente no navegador. Os dados ficam salvos localmente, sem necessidade de servidor — ideal para uso pessoal e rápido.
 
-Acesso:https://bresodev.github.io/Sistema-Mecanica/
+Acesso: https://bresodev.github.io/Sistema-Mecanica/
 ---
 
 ## 🚀 O que faz?
