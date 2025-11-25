@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Sistema Oficina de Motos</title>
+        <style>
+        body {
+            margin: 0;
+            font-family: "Roboto", sans-serif;
+            background-color: #1c1c1c;
+            color: #eee;
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 220px;
+            background-color: #111;
+            display: flex;
+            flex-direction: column;
+            padding-top: 20px;
+            border-right: 2px solid #ff6600;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            color: #ff6600;
+            margin-bottom: 30px;
+            letter-spacing: 1px;
+        }
+
+        .menu-item {
+            padding: 15px 20px;
+            cursor: pointer;
+            border-left: 4px solid transparent;
+            transition: 0.2s;
+        }
+
+        .menu-item:hover,
+        .menu-item.active {
+            background-color: #222;
+            border-left: 4px solid #ff6600;
+        }
+
+        /* Conteúdo principal */
+        .main {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            color: #ff6600;
+        }
+
+        .btn {
+            background-color: #ff6600;
+            border: none;
+            padding: 10px 15px;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .btn:hover {
+            background-color: #e55a00;
+        }
+
+        /* Cards */
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background-color: #2a2a2a;
+            border-left: 5px solid #ff6600;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: scale(1.03);
+        }
+
+        .card h3 {
+            margin: 0;
+            color: #ff6600;
+        }
+
+        .card p {
+            font-size: 1.5em;
+            margin-top: 10px;
+            color: #fff;
+        }
+
+        /* Gráfico fake */
+        .chart {
+            margin-top: 30px;
+            background-color: #2a2a2a;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .bar {
+            background-color: #ff6600;
+            height: 20px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+
+        .bar:nth-child(1) {
+            width: 80%;
+        }
+
+        .bar:nth-child(2) {
+            width: 50%;
+        }
+
+        .bar:nth-child(3) {
+            width: 65%;
+        }
+
+        /* Conteúdo de páginas ocultas */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Tabelas */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background-color: #2a2a2a;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #444;
+            text-align: left;
+        }
+
+        th {
+            background-color: #333;
+            color: #ff6600;
+        }
+
+        input,
+        select {
+            background-color: #333;
+            border: 1px solid #555;
+            color: #fff;
+            padding: 8px;
+            border-radius: 4px;
+            width: 100%;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .form-row div {
+            flex: 1;
+        }
+
+        @media (max-width: 700px) {
+            .sidebar {
+                width: 80px;
+            }
+
+            .sidebar h2 {
+                display: none;
+            }
+
+            .menu-item {
+                text-align: center;
+                padding: 15px 0;
+            }
+        }
+
+        details {
+            padding: 5px;
+            border-radius: 5px;
+            background-color: #555;
+            border-left: 3px solid #ff6600;
+            cursor: pointer;
+            margin-bottom: 5px;
+        }
+
+        details li {
+            margin-left: 15px;
+        }
+
+        details li p {
+            background-color: #1c1c1c;
+            padding-left: 5px;
+        }
+
+        textarea {
+            resize: vertical;
+            width: 95%;
+            background-color: #333;
+            color: rgb(255, 255, 255);
+            height: 50px;
+        }
+
+        #recibo table {
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+        </style>
+    </head>
+    <body>
+        <div class="sidebar">
+            <h2>🏍️ Oficina</h2>
+            <div class="menu-item active" onclick="changePage('dashboard', this)">📊 Painel</div>
+            <div class="menu-item" onclick="changePage('servicos', this)">🔧 Serviços</div>
+            <div class="menu-item" onclick="changePage('pecas', this)">⚙️ Peças</div>
+            <div class="menu-item" onclick="changePage('clientes', this)">👥 Clientes</div>
+            <div class="menu-item" onclick="changePage('agenda', this)">📅 Agenda</div>
+            <div class="menu-item" onclick="changePage('financeiro', this)">💰 Financeiro</div>
+            <div class="menu-item" onclick="changePage('dev', this)">💰 Dev</div>
+        </div>
+        <div class="main">
+            <div class="header">
+                <h1 id="pageTitle">Painel da Oficina</h1>
+                <!--<button class="btn">+ Novo</button>-->
+            </div>
+            <!-- Painel -->
+            <div id="dashboard" class="page active">
+                <div class="cards">
+                    <div class="card">
+                        <h3>Serviços em andamento</h3>
+                        <p id="servicos_em_andamento">--</p>
+                    </div>
+                    <div class="card">
+                        <h3>Clientes cadastrados</h3>
+                        <p id="total_clientes_cadastrados">--</p>
+                    </div>
+                    <div class="card">
+                        <h3>Agendamentos</h3>
+                        <p id="total_de_agendamentos">--</p>
+                    </div>
+                    <div class="card">
+                        <h3>Faturamento</h3>
+                        <p id="faturamento_total">--</p>
+                    </div>
+                </div>
+                <!--
+                <div class="chart">
+                <h3>Serviços mais realizados</h3>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+            </div>
+            -->
+            </div>
+            <!-- Serviços -->
+            <div id="servicos" class="page">
+                <h2>Serviços</h2>
+                <div class="form-row">
+                    <div>
+                        <input type="text" id="cliente" placeholder="Cliente">
+                    </div>
+                    <div>
+                        <input type="text" id="descricao" placeholder="Descrição do serviço">
+                    </div>
+                    <div>
+                        <input type="number" id="valor" placeholder="Valor (R$)">
+                    </div>
+                    <div>
+                        <button class="btn" onclick="adicionarServico()">Adicionar</button>
+                    </div>
+                </div>
+                <table id="tabelaServicos">
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Serviço</th>
+                            <th>Valor</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+                <!---------------->
+                <hr>
+                <div>
+                    <table id="recibo"></table>
+                </div>
+                <div id="recibo-total"></div>
+                <!---------------->
+            </div>
+            <!-- Peças -->
+            <div id="pecas" class="page">
+                <h2>Controle de Peças</h2>
+                <p>Em breve: cadastro e controle de estoque de peças.</p>
+            </div>
+            <!-- Clientes -->
+            <div id="clientes" class="page">
+                <h2>Clientes</h2>
+                <div class="form-row">
+                    <div>
+                        <input
+                            style="width: 86%"
+                            type="text"
+                            id="nome_cliente"
+                            placeholder="Cliente"
+                        >
+                    </div>
+                    <div>
+                        <input
+                            style="width: 86%"
+                            type="text"
+                            id="endereco_cliente"
+                            placeholder="Endereço"
+                        >
+                    </div>
+                    <div>
+                        <input
+                            style="width: 86%"
+                            type="number"
+                            id="telefone_cliente"
+                            placeholder="Telefone"
+                        >
+                    </div>
+                    <div>
+                        <input
+                            style="width: 86%"
+                            type="number"
+                            id="cpf_cliente"
+                            placeholder="CPF"
+                        >
+                    </div>
+                    <div>
+                        <button class="btn" onclick="adicionarCliente()">Cadastrar</button>
+                    </div>
+                </div>
+                <hr>
+                <div id="tabela_clientes"></div>
+            </div>
+            <!-- Agenda -->
+            <div id="agenda" class="page">
+                <h2>Agenda</h2>
+                <div class="form-row">
+                    <div>
+                        <input type="date" id="dataAgenda">
+                    </div>
+                    <div>
+                        <input type="text" id="servicoAgenda" placeholder="Serviço">
+                    </div>
+                    <div>
+                        <input type="text" id="clienteAgenda" placeholder="Cliente">
+                    </div>
+                    <div>
+                        <button class="btn" onclick="adicionarAgendamento()">Agendar</button>
+                    </div>
+                </div>
+                <table id="tabelaAgenda">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Serviço</th>
+                            <th>Cliente</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <!-- Financeiro -->
+            <div id="financeiro" class="page">
+                <h2>Financeiro</h2>
+                <div class="form-row">
+                    <div>
+                        <select id="tipoMov">
+                            <option value="Entrada">Entrada</option>
+                            <option value="Saída">Saída</option>
+                        </select>
+                    </div>
+                    <div>
+                        <input type="text" id="descMov" placeholder="Descrição">
+                    </div>
+                    <div>
+                        <input type="number" id="valorMov" placeholder="Valor (R$)">
+                    </div>
+                    <div>
+                        <button class="btn" onclick="adicionarMov()">Adicionar</button>
+                    </div>
+                </div>
+                <table id="tabelaFinanceiro">
+                    <thead>
+                        <tr>
+                            <th>Tipo</th>
+                            <th>Descrição</th>
+                            <th>Valor</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+                <h3 id="saldoTotal" style="margin-top:15px;">Saldo total: R$ 0,00</h3>
+            </div>
+            <!-- Financeiro -->
+            <div id="dev" class="page">
+                <h2>Dev</h2>
+                <button onclick="zerarClientes()" class="btn">Zerar Clientes</button>
+                <button onclick="zerarServiços()" class="btn">Zerar Serviços</button>
+                <button onclick="zerarAgenda()" class="btn">Zerar Agenda</button>
+                <br>
+                <br>
+                <button onclick="gerarClientes()" class="btn">Gerar Clientes</button>
+                <button onclick="gerarServicos()" class="btn">Gerar Serviços</button>
+                <button onclick="gerarAgendamentos()" class="btn">Gerar Agendamentos</button>
+                <br>
+                <hr>
+                <br>
+                <button onclick="exportarDados()" class="btn">Exportar Dados</button>
+                <textarea
+                    name=""
+                    id="exportarDados"
+                    cols="30"
+                    rows="10"
+                ></textarea>
+            </div>
+        </div>
+        <script>
+        /*
+localStorage.removeItem('servicos') = armazena os servicos
+localStorage.removeItem('agenda') = armazena os agendamentos
+localStorage.removeItem('clientes') = armazena os clientes
+localStorage.removeItem('saldo_total') = armazena o saldo total
+localStorage.removeItem('faturamento') = armazena o faturamento do mes
+
+
+
+       */
+        var faturamento = 0;
+        if (!localStorage.getItem('faturamento')) {
+            localStorage.setItem('faturamento',faturamento)
+        }
+        faturamento = parseInt(localStorage.getItem('faturamento'))
+
+
+
+
+        function gerarAgendamentos() {
+
+            document.getElementById("dataAgenda").value = '2025-10-14'
+            document.getElementById("servicoAgenda").value = 'Troca de Roda'
+            document.getElementById("clienteAgenda").value = 'Eduardo'
+            adicionarAgendamento()
+            //------------------------------
+            document.getElementById("dataAgenda").value = '2025-11-14'
+            document.getElementById("servicoAgenda").value = 'Troca de Oleo'
+            document.getElementById("clienteAgenda").value = 'Zezinho'
+            adicionarAgendamento()
+            //------------------------------
+            document.getElementById("dataAgenda").value = '2025-10-19'
+            document.getElementById("servicoAgenda").value = 'Troca de Roda'
+            document.getElementById("clienteAgenda").value = 'Joaozinho'
+            adicionarAgendamento()
+            //------------------------------
+            document.getElementById("dataAgenda").value = '2025-10-10'
+            document.getElementById("servicoAgenda").value = 'Troca de Oleo'
+            document.getElementById("clienteAgenda").value = 'Zezinho'
+            adicionarAgendamento()
+            //------------------------------
+        }
+
+        function gerarServicos() {
+
+            document.getElementById('cliente').value = 'Eduardo'
+            document.getElementById('descricao').value = 'Troca de Oleo'
+            document.getElementById('valor').value = '100'
+            adicionarServico()
+            //--------------------------
+            document.getElementById('cliente').value = 'Zezinho'
+            document.getElementById('descricao').value = 'Troca de Velas'
+            document.getElementById('valor').value = '50'
+            adicionarServico()
+            //--------------------------
+            document.getElementById('cliente').value = 'Joaozinho'
+            document.getElementById('descricao').value = 'Solda no quadro'
+            document.getElementById('valor').value = '350'
+            adicionarServico()
+            //--------------------------
+        }
+
+        function exportarDados() {
+            var s = ''
+
+            if (localStorage.getItem('servicos')) {
+                s += 'localStorage.setItem("servicos",' + JSON.stringify(localStorage.getItem('servicos')) + ');\n'
+            }
+            if (localStorage.getItem('agenda')) {
+                s += 'localStorage.setItem("agenda",' + JSON.stringify(localStorage.getItem('agenda')) + ');\n'
+            }
+            if (localStorage.getItem('clientes')) {
+                s += 'localStorage.setItem("clientes",' + JSON.stringify(localStorage.getItem('clientes')) + ');\n'
+            }
+            s += 'window.location.reload();'
+
+            document.getElementById('exportarDados').value = s
+        }
+
+        function gerarClientes() {
+
+            document.getElementById("nome_cliente").value = 'Eduardo';
+            document.getElementById("endereco_cliente").value = 'Rua dos bobos 1';
+            document.getElementById("telefone_cliente").value = '54996180319';
+            document.getElementById("cpf_cliente").value = '02370657030';
+            adicionarCliente()
+
+            document.getElementById("nome_cliente").value = 'July';
+            document.getElementById("endereco_cliente").value = 'Rua dos bobos 2';
+            document.getElementById("telefone_cliente").value = '54996180320';
+            document.getElementById("cpf_cliente").value = '02370657031';
+            adicionarCliente()
+
+            document.getElementById("nome_cliente").value = 'Abiloaldo';
+            document.getElementById("endereco_cliente").value = 'Rua dos bobos 3';
+            document.getElementById("telefone_cliente").value = '54996180321';
+            document.getElementById("cpf_cliente").value = '02370657032';
+            adicionarCliente()
+
+            document.getElementById("nome_cliente").value = 'Zezinho';
+            document.getElementById("endereco_cliente").value = 'Rua dos bobos 4';
+            document.getElementById("telefone_cliente").value = '54996180322';
+            document.getElementById("cpf_cliente").value = '02370657033';
+            adicionarCliente()
+        }
+
+        function zerarClientes() {
+            localStorage.removeItem('clientes')
+            window.location.reload()
+            changePage('dev', this)
+        }
+        function zerarAgenda() {
+            localStorage.removeItem('agenda')
+            window.location.reload()
+            changePage('dev', this)
+        }
+        function zerarServiços() {
+            localStorage.removeItem('servicos')
+            window.location.reload()
+            changePage('dev', this)
+        }
+
+
+        function gerarID() {
+            var b = new Date()
+            return (b.getTime() - Math.floor(Math.random() * 1000)).toString()
+        }
+
+
+
+        //hook
+        setInterval(() => {
+
+            //att os dados do painel principal
+            document.getElementById('servicos_em_andamento').innerHTML = servicosEmAndamento()
+            document.getElementById('total_de_agendamentos').innerHTML = totalAgendamentos()
+            document.getElementById('total_clientes_cadastrados').innerHTML = totalClientes()
+            document.getElementById('faturamento_total').innerHTML = 'R$ '+faturamento+'.00'
+            //-----------------------
+        }, 1000);
+
+
+        function changePage(page, element) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelector(`#${page}`).classList.add('active');
+            document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+            element.classList.add('active');
+            document.getElementById("pageTitle").textContent = element.textContent.trim();
+        }
+
+        /* --- Serviços ---tudo ok e funcionando */
+
+        carregarServicos()
+
+        function servicosEmAndamento() {
+            if (localStorage.getItem('servicos')) {
+                return JSON.parse(localStorage.getItem('servicos')).length
+            }
+            return 0;
+        }
+
+        function deletarServico(linha) {
+            var arraia = JSON.parse(localStorage.getItem('servicos'))
+            arraia = arraia.filter(item => item !== linha)
+            localStorage.setItem('servicos', JSON.stringify(arraia))
+        }
+        function carregarServicos() {
+            if (!localStorage.getItem('servicos')) { return }
+
+            var arraia = JSON.parse(localStorage.getItem('servicos'))
+            arraia.sort()
+            arraia.forEach(element => {
+                const id = gerarID();
+                const partes = element.split('|')
+                const tbody = document.querySelector("#tabelaServicos tbody");
+                const tr = document.createElement("tr");
+                tr.innerHTML = `<td>${partes[0]}</td><td>${partes[1]}</td><td>R$ ${partes[2]}</td><td><button onclick="addRecibo('${partes[0]}','${partes[1]}','${parseFloat(partes[2]).toFixed(2)}')">Add</button><button id="${id}" onclick="this.parentNode.parentNode.remove()">🗑️</button></td>`;
+                tbody.appendChild(tr);
+
+                document.getElementById(id).addEventListener('click', () => {
+                    deletarServico(`${partes[0]}|${partes[1]}|${partes[2]}`)
+                })
+            });
+        }
+
+        var recibo_total = 0;
+
+        function addRecibo(cliente, descricao, valor) {
+            var s = document.getElementById('recibo').innerHTML
+            //s += cliente + '' + descricao + '' + valor + '<br>'
+            s += '<tr><td>' + descricao + '</td><td>R$ ' + valor + '</td><tr>'
+            document.getElementById('recibo').innerHTML = s
+
+            recibo_total += parseInt(valor)
+            document.getElementById('recibo-total').innerHTML = '<table><tr><td>Total: </td><td>R$ ' + recibo_total + '</td><tr></table>'
+
+        }
+
+        function adicionarServico() {
+            const cliente = document.getElementById('cliente').value.trim();
+            const desc = document.getElementById('descricao').value.trim();
+            const val = document.getElementById('valor').value.trim();
+            if (!cliente || !desc || !val) return alert("Preencha todos os campos!");
+            const tbody = document.querySelector("#tabelaServicos tbody");
+            const tr = document.createElement("tr");
+            tr.innerHTML = `<td>${cliente}</td><td>${desc}</td><td>R$ ${parseFloat(val).toFixed(2)}</td><td><button onclick="addRecibo('${cliente}','${desc}','${parseFloat(val).toFixed(2)}')">Add</button><button onclick="this.parentNode.parentNode.remove()">🗑️</button></td>`;
+            tbody.appendChild(tr);
+            if (localStorage.getItem('servicos')) {
+                var arraia = JSON.parse(localStorage.getItem('servicos'))
+                arraia.push(`${cliente}|${desc}|${parseFloat(val).toFixed(2)}`)
+                localStorage.setItem('servicos', JSON.stringify(arraia))
+            }
+            else {
+                var arraia = [];
+                arraia.push(`${cliente}|${desc}|${parseFloat(val).toFixed(2)}`)
+                localStorage.setItem('servicos', JSON.stringify(arraia))
+            }
+            document.getElementById("cliente").value = "";
+            document.getElementById("descricao").value = "";
+            document.getElementById("valor").value = "";
+        }
+
+
+        /* --- Agenda ---tudo ok funcionando */
+
+        carregarAgendamentos()
+
+
+
+        function totalAgendamentos() {
+            if (localStorage.getItem('agenda')) {
+                return JSON.parse(localStorage.getItem('agenda')).length
+            }
+            return 0;
+        }
+
+        function deletarAgendamento(linha) {
+            var arraia = JSON.parse(localStorage.getItem('agenda'))
+            arraia = arraia.filter(item => item !== linha)
+            localStorage.setItem('agenda', JSON.stringify(arraia))
+        }
+
+        function formatarData(d) {
+            const a = d.split('-')
+            return `${a[2]}/${a[1]}/${a[0]}`
+        }
+
+        function carregarAgendamentos() {
+            if (localStorage.getItem('agenda')) {
+                var arraia = JSON.parse(localStorage.getItem('agenda'))
+
+                arraia.forEach(element => {
+
+                    const id = gerarID();
+                    const partes = element.split('|')
+                    const tbody = document.querySelector("#tabelaAgenda tbody");
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `<td>${partes[0]}</td><td>${partes[1]}</td><td>${partes[2]}</td><td><button id="${id}" onclick="this.parentNode.parentNode.remove()">🗑️</button></td>`;
+                    tbody.appendChild(tr);
+
+                    document.getElementById(id).addEventListener('click', () => {
+                        deletarAgendamento(`${partes[0]}|${partes[1]}|${partes[2]}`)
+                    })
+                });
+            }
+
+
+        }
+        function adicionarAgendamento() {
+            const data = document.getElementById("dataAgenda").value;
+            const servico = document.getElementById("servicoAgenda").value.trim();
+            const cliente = document.getElementById("clienteAgenda").value.trim();
+            if (!data || !servico || !cliente) return alert("Preencha todos os campos!");
+
+            const tbody = document.querySelector("#tabelaAgenda tbody");
+            const tr = document.createElement("tr");
+            tr.innerHTML = `<td>${formatarData(data)}</td><td>${servico}</td><td>${cliente}</td><td><button onclick="this.parentNode.parentNode.remove()">🗑️</button></td>`;
+            tbody.appendChild(tr);
+
+            if (localStorage.getItem('agenda')) {
+                var arraia = JSON.parse(localStorage.getItem('agenda'))
+                arraia.push(`${formatarData(data)}|${servico}|${cliente}`)
+                localStorage.setItem('agenda', JSON.stringify(arraia))
+            }
+            else {
+                var arraia = [];
+                arraia.push(`${formatarData(data)}|${servico}|${cliente}`)
+                localStorage.setItem('agenda', JSON.stringify(arraia))
+            }
+
+
+            dataAgenda.value = "";
+            servicoAgenda.value = "";
+            clienteAgenda.value = "";
+        }
+
+
+
+
+        /*Clientes*/
+        carregarClientes()
+
+        function deletarCliente(linha) {
+            var arraia = JSON.parse(localStorage.getItem('clientes'))
+            arraia = arraia.filter(item => item !== linha)
+            localStorage.setItem('clientes', JSON.stringify(arraia))
+            carregarClientes()
+        }
+
+        function totalClientes() {
+            if (localStorage.getItem('clientes')) {
+                return JSON.parse(localStorage.getItem('clientes')).length
+            }
+            return 0;
+        }
+
+        function carregarClientes() {
+
+            document.getElementById('tabela_clientes').innerHTML = ''
+
+            if (localStorage.getItem('clientes')) {
+
+
+                var arraia = JSON.parse(localStorage.getItem('clientes'))
+                arraia.sort()
+                arraia.forEach(element => {
+
+                    const id_1 = gerarID();
+                    const id_2 = gerarID();
+                    const id_3 = gerarID();
+
+                    const id_4 = gerarID();
+                    const id_5 = gerarID();
+                    const id_6 = gerarID();
+                    const id_7 = gerarID();
+
+                    const partes = element.split('|')
+
+
+
+                    document.getElementById('tabela_clientes').innerHTML += `
+                    <details>
+                        <summary>${partes[0]}</summary>
+                        <br>
+                        <li>Endereço: 
+                            <input  style="width: 40%"  id="${id_4}" value="${partes[1]}">
+                        </li>
+                        <li>Telefone: 
+                            <input  style="width: 40%"  id="${id_5}" value="${partes[2]}">
+                        </li>
+                        <li>CPF: 
+                            <input  style="width: 40%"  id="${id_6}" value="${partes[3]}">
+                        </li>
+
+                        <br>
+                        <button onclick="" class="btn">Chamar no WhatsApp</button>
+                        <button onclick="deletarCliente('${partes[0]}|${partes[1]}|${partes[2]}|${partes[3]}|${partes[4]}')" class="btn">Apagar Cadastro 🗑️</button>
+                        
+                       
+                        <br> 
+                        <br> 
+
+                        <li>Historico:<br><br>
+                            <p id="${id_3}">${partes[4]}</p>
+                        </li>
+                        <br>
+                        <hr>
+                        <br>
+                        <li>Adicionar anotação ao historico:</li>
+                        <input style="width: 70%" type="text" id="${id_1}">
+                        <button onclick="attHistorico('${partes[0]}','${partes[1]}','${partes[2]}','${partes[3]}','${partes[4]}','${id_1}')" class="btn">Adicionar</button>
+                        
+
+                        <br>
+                        <br>
+                        <hr>
+                        <br>
+                    </details>
+                    `;
+
+
+
+
+
+                });
+
+            }
+        }
+
+        function attHistorico(nome, end, tel, cpf, hist, adicao = '0') {
+            var arraia = JSON.parse(localStorage.getItem('clientes'))
+            var ct = 0;
+            arraia.forEach(x => {
+
+                console.log(x)
+
+                if (x.includes(cpf)) {
+
+                    if (document.getElementById(adicao).value == '') {
+                        arraia[ct] = `${nome}|${end}|${tel}|${cpf}|${hist + '<br>' + logg('Att vazia')}`;
+
+                    }
+                    else {
+                        arraia[ct] = `${nome}|${end}|${tel}|${cpf}|${hist + '<br>' + logg(document.getElementById(adicao).value)}`;
+
+                    }
+                }
+                ct++
+
+            });
+
+            localStorage.setItem('clientes', JSON.stringify(arraia))
+
+            carregarClientes()
+
+        }
+
+        function adicionarCliente() {
+            const nome_cliente = document.getElementById("nome_cliente").value;
+            const endereco_cliente = document.getElementById("endereco_cliente").value.trim();
+            const telefone_cliente = document.getElementById("telefone_cliente").value;
+            const cpf_cliente = document.getElementById("cpf_cliente").value;
+
+            if (!nome_cliente || !endereco_cliente || !telefone_cliente || !cpf_cliente) return alert("Preencha todos os campos!");
+
+            //valida cpf
+            if (cpf_cliente.length !== 11) return alert("CPF Inválido!");
+
+            if (telefone_cliente.length !== 11) return alert("Celular Inválido!");
+
+
+            if (localStorage.getItem('clientes')) {
+                var arraia = JSON.parse(localStorage.getItem('clientes'))
+                arraia.push(`${nome_cliente}|${endereco_cliente}|${telefone_cliente}|${cpf_cliente}|${logg('Cliente cadastrado')}`)
+                localStorage.setItem('clientes', JSON.stringify(arraia))
+            }
+            else {
+                var arraia = [];
+                arraia.push(`${nome_cliente}|${endereco_cliente}|${telefone_cliente}|${cpf_cliente}|${logg('Cliente cadastrado')}`)
+                localStorage.setItem('clientes', JSON.stringify(arraia))
+            }
+
+
+            document.getElementById("nome_cliente").value = "";
+            document.getElementById("endereco_cliente").value = "";
+            document.getElementById("telefone_cliente").value = "";
+            document.getElementById("cpf_cliente").value = "";
+
+            carregarClientes()
+
+        }
+
+
+
+
+
+
+        /* --- Financeiro --- */
+
+        document.getElementById("saldoTotal").textContent = `Saldo total: R$ ${faturamento}.00`;
+
+        
+        function adicionarMov() {
+            const tipo = document.getElementById('tipoMov').value;
+            const desc = document.getElementById('descMov').value.trim();
+            const val = parseInt(document.getElementById('valorMov').value);
+            if (!desc || isNaN(val)) return alert("Preencha todos os campos corretamente!");
+
+            const tbody = document.querySelector("#tabelaFinanceiro tbody");
+            const tr = document.createElement("tr");
+            tr.innerHTML = `<td>${tipo}</td><td>${desc}</td><td>R$ ${val}.00</td>`;
+            tbody.appendChild(tr);
+
+            if(tipo === "Entrada")
+                faturamento += val ;
+            else
+                faturamento -=  val;
+
+            document.getElementById("saldoTotal").textContent = `Saldo total: R$ ${faturamento}.00`;
+
+            document.getElementById('descMov').value = "";
+            document.getElementById('valorMov').value = "";
+
+            localStorage.setItem('faturamento',faturamento)
+
+            if(localStorage.getItem('ListaMovimentacoes')){
+                localStorage.setItem('ListaMovimentacoes',localStorage.getItem('ListaMovimentacoes')+tipo+"|"+desc+"|"+val+"&")
+            }else{
+                localStorage.setItem('ListaMovimentacoes',tipo+"|"+desc+"|"+val+"&")
+            }
+            
+
+        }
+
+carregarMovimentacoes()
+
+        function carregarMovimentacoes() {
+
+            if(!localStorage.getItem('ListaMovimentacoes')){
+                return;
+            }
+			
+            
+
+            const listaMovs = localStorage.getItem('ListaMovimentacoes').split('&')
+
+            listaMovs.forEach(x => {
+
+                
+
+                const itens = x.split('|')
+                
+                if(!itens[0]){
+                    return
+                }
+
+                console.log('itens[0] = '+itens[0])
+
+                const tbody = document.querySelector("#tabelaFinanceiro tbody");
+                const tr = document.createElement("tr");
+                tr.innerHTML = `<td>${itens[0]}</td><td>${itens[1]}</td><td>R$ ${itens[2]}.00</td>`;
+                tbody.appendChild(tr);
+
+            });
+			
+            
+
+            
+
+            localStorage.setItem('faturamento',faturamento)
+
+        }
+
+
+
+
+        function logg(texto) {
+            var b = new Date()
+            return '[' + b.getDay() + '/' + b.getMonth() + '/' + b.getFullYear() + ' - ' + b.getHours() + ':' + b.getMinutes() + '] = ' + texto
+
+        }
+        </script>
+    </body>
+</html>
